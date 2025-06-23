@@ -1,16 +1,16 @@
-FROM node:18
+FROM python:3.11-slim
 
-# Install yt-dlp
-RUN apt-get update && apt-get install -y python3 python3-pip && pip3 install yt-dlp
-
-# Set working directory
 WORKDIR /app
 
-# Copy files
+# Install yt-dlp
+RUN pip install yt-dlp flask
+
+# Copy project files
 COPY . .
 
-# Install Node dependencies
-RUN npm install
+# Expose port (for Railway)
+EXPOSE 8000
 
-EXPOSE 3000
-CMD ["npm", "start"]
+# Run the app
+CMD ["python", "index.py"]
+
