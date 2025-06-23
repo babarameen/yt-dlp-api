@@ -1,16 +1,11 @@
-FROM python:3.11-slim
+FROM python:3.10-slim
 
 WORKDIR /app
 
-# Install yt-dlp
-RUN pip install yt-dlp flask
-
-# Copy project files
 COPY . .
 
-# Expose port (for Railway)
+RUN pip install --no-cache-dir -r requirements.txt
+
 EXPOSE 8000
 
-# Run the app
-CMD ["python", "index.py"]
-
+CMD ["gunicorn", "-b", "0.0.0.0:8000", "index:app"]
