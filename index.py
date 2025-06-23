@@ -3,24 +3,30 @@ import yt_dlp
 
 app = Flask(__name__)
 
-@app.route('/download')
+@app.route("/")
+def home():
+    return "YT-DLP API is running!"
+
+@app.route("/download", methods=["GET"])
 def download():
-    video_url = request.args.get('url')
-    if not video_url:
-        return jsonify({'error': 'Missing URL'}), 400
+    url = request.args.get("url")
+    if not url:
+        return jsonify({"error": "Missing URL parameter"}), 400
 
     ydl_opts = {
         'quiet': True,
         'skip_download': True,
-        'forcejson': True
+        'forceurl': True,
+        'simulate': True,
+        'extract_flat': True,
     }
 
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info = ydl.extract_info(video_url, download=False)
-            return jsonify({'video_url': info['url'], 'title': info['title']})
+            info = ydl.extract_info(url, download=False)
+            return jsonify(info)
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({"error": str(e)}), 500
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8000)
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=8000)
