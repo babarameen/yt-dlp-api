@@ -1,11 +1,20 @@
 FROM python:3.10-slim
 
+# Install ffmpeg
+RUN apt-get update && apt-get install -y ffmpeg
+
+# Set work directory
 WORKDIR /app
 
+# Copy requirements and install dependencies
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+
+# Copy all code
 COPY . .
 
-RUN pip install --no-cache-dir -r requirements.txt
+# Expose port
+EXPOSE 8080
 
-EXPOSE 8000
-
-CMD ["gunicorn", "-b", "0.0.0.0:8000", "index:app"]
+# Run the app
+CMD ["gunicorn", "--bind", "0.0.0.0:8080", "index:app"]
