@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
 import yt_dlp
-import io
+import os
 import traceback
 
 app = Flask(__name__)
@@ -21,38 +21,40 @@ def download_audio():
     if not url:
         return jsonify({"error": "Missing URL parameter"}), 400
 
+    output_file = f"output.{format}"  # temporary file
+
+    ydl_opts = {
+        'format': 'bestaudio/best',
+        'outtmpl': output_file,  # write to file
+        'postprocessors': [{
+            'key': 'FFmpegExtractAudio',
+            'preferredcodec': format,
+            'preferredquality': quality,
+        }],
+        'quiet': True,
+        'cookiefile': 'cookies.txt',  # pass cookies for YouTube login
+    }
+
     try:
-        # Use in-memory buffer to store audio
-        buffer = io.BytesIO()
-        ydl_opts = {
-            'format': 'bestaudio/best',
-            'outtmpl': '-',  # output to stdout
-            'postprocessors': [{
-                'key': 'FFmpegExtractAudio',
-                'preferredcodec': format,
-                'preferredquality': quality,
-            }],
-            'quiet': True,
-            'cookiefile': 'cookies.txt',  # pass cookies
-            'logger': yt_dlp.Logger(),    # enable yt-dlp logging
-        }
-
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            # Download audio into buffer
-            result = ydl.download([url])
-            print("yt-dlp result:", result)  # log for debug
+            ydl.download([url])  # download audio
 
-        buffer.seek(0)
+        # Send file as attachment
         return send_file(
-            buffer,
+            output_file,
             as_attachment=True,
             download_name=f"audio.{format}",
             mimetype="audio/mpeg"
         )
 
     except Exception as e:
-        traceback.print_exc()  # print full error to Railway logs
+        traceback.print_exc()  # log full error
         return jsonify({"error": str(e)}), 500
+
+    finally:
+        # Clean up downloaded file
+        if os.path.exists(output_file):
+            os.remove(output_file)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080)
