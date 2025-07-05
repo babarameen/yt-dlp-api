@@ -13,46 +13,47 @@ def home():
 
 @app.route("/download", methods=["POST"])
 def download_audio():
-    data = request.get_json()
-    url = data.get("url")
-    format = data.get("format", "mp3")
-    quality = data.get("quality", "192")
-
-    if not url:
-        return jsonify({"error": "Missing URL parameter"}), 400
-
-    output_file = f"output.{format}"  # temporary file
-
-    ydl_opts = {
-        'format': 'bestaudio/best',
-        'outtmpl': output_file,  # write to file
-        'postprocessors': [{
-            'key': 'FFmpegExtractAudio',
-            'preferredcodec': format,
-            'preferredquality': quality,
-        }],
-        'quiet': True,
-        'cookiefile': 'cookies.txt',  # pass cookies for YouTube login
-    }
-
     try:
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            ydl.download([url])  # download audio
+        data = request.get_json()
+        url = data.get("url")
+        format = data.get("format", "mp3")
+        quality = data.get("quality", "192")
 
-        # Send file as attachment
+        if not url:
+            return jsonify({"error": "Missing URL parameter"}), 400
+
+        output_file = f"output.{format}"
+
+        ydl_opts = {
+            'format': 'bestaudio/best',
+            'outtmpl': output_file,
+            'postprocessors': [{
+                'key': 'FFmpegExtractAudio',
+                'preferredcodec': format,
+                'preferredquality': quality,
+            }],
+            'quiet': True,
+            'cookiefile': 'cookies.txt',  # add your YouTube cookies file
+        }
+
+        # Download audio
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            ydl.download([url])
+
+        # Return the file as download
         return send_file(
             output_file,
             as_attachment=True,
             download_name=f"audio.{format}",
             mimetype="audio/mpeg"
         )
-
+    except yt_dlp.utils.DownloadError as e:
+        traceback.print_exc()
+        return jsonify({"error": f"Download error: {str(e)}"}), 500
     except Exception as e:
-        traceback.print_exc()  # log full error
-        return jsonify({"error": str(e)}), 500
-
+        traceback.print_exc()
+        return jsonify({"error": f"Server error: {str(e)}"}), 500
     finally:
-        # Clean up downloaded file
         if os.path.exists(output_file):
             os.remove(output_file)
 
