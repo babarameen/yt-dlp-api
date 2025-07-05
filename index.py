@@ -10,7 +10,7 @@ CORS(app)  # ✅ Allow requests from any domain for now
 def home():
     return "YT-DLP API is running!"
 
-# ✅ Existing GET /download for metadata
+# ✅ GET /download for metadata
 @app.route("/download", methods=["GET"])
 def get_video_info():
     url = request.args.get("url")
@@ -22,6 +22,7 @@ def get_video_info():
         'skip_download': True,
         'forceurl': True,
         'simulate': True,
+        'cookiefile': 'cookies.txt',  # ✅ Use cookies to bypass bot detection
     }
 
     try:
@@ -38,7 +39,7 @@ def get_video_info():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# ✅ New POST /download for actual audio file
+# ✅ POST /download for actual audio file
 @app.route("/download", methods=["POST"])
 def download_audio():
     data = request.get_json()
@@ -54,6 +55,7 @@ def download_audio():
     ydl_opts = {
         'format': 'bestaudio/best',
         'outtmpl': output_file,
+        'cookiefile': 'cookies.txt',  # ✅ Added cookie support
         'postprocessors': [{
             'key': 'FFmpegExtractAudio',
             'preferredcodec': format,
