@@ -18,3 +18,6 @@ EXPOSE 8080
 
 # Run with Gunicorn
 CMD ["gunicorn", "--bind", "0.0.0.0:8080", "index:app"]
+
+CMD ["gunicorn", "--bind", "0.0.0.0:8080", "--timeout", "120", "index:app"]
+
