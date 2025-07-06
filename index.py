@@ -42,8 +42,6 @@ def download_audio():
                 'preferredquality': quality,
             }],
             'quiet': True,
-            # Remove cookies.txt if you don't need it
-            # 'cookiefile': 'cookies.txt',  # optional: for restricted videos
         }
 
         print(f"▶️ Starting download for: {url}")
