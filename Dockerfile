@@ -1,22 +1,20 @@
 FROM python:3.10-slim
 
 # Install system dependencies
-RUN apt-get update && apt-get install -y ffmpeg
+RUN apt-get update && apt-get install -y ffmpeg && apt-get clean
 
 # Set working directory
 WORKDIR /app
 
-# Copy requirements first (to cache dependencies)
-COPY requirements.txt .
-
 # Install Python dependencies
+COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the rest of the app
+# Copy application files
 COPY . .
 
-# Expose port (Railway will bind dynamically)
+# Expose port
 EXPOSE 8080
 
-# Start Gunicorn server
+# Start app with Gunicorn
 CMD ["gunicorn", "--bind", "0.0.0.0:8080", "index:app"]
