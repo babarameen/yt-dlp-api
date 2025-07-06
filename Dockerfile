@@ -17,4 +17,4 @@ COPY . .
 EXPOSE 8080
 
 # Run Gunicorn with Railway's dynamic PORT
-CMD exec gunicorn --bind :$PORT --timeout 120 index:app
+CMD exec gunicorn --bind :$PORT --timeout 120 wsgi:app
