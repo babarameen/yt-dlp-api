@@ -9,16 +9,13 @@ import mimetypes
 app = Flask(__name__)
 CORS(app)  # Allow requests from frontend
 
-
 @app.route("/")
 def home():
     return "✅ YT-DLP API is running!"
 
-
 @app.route("/health", methods=["GET"])
 def health():
     return jsonify({"status": "ok"}), 200
-
 
 @app.route("/download", methods=["POST"])
 def download_audio():
@@ -45,7 +42,8 @@ def download_audio():
                 'preferredquality': quality,
             }],
             'quiet': True,
-            'cookiefile': 'cookies.txt',  # optional: for restricted videos
+            # Remove cookies.txt if you don't need it
+            # 'cookiefile': 'cookies.txt',  # optional: for restricted videos
         }
 
         print(f"▶️ Starting download for: {url}")
@@ -85,6 +83,7 @@ def download_audio():
         traceback.print_exc()
         return jsonify({"error": f"Server error: {str(e)}"}), 500
 
-
+# ✅ Use Railway's dynamic PORT
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8080)
+    port = int(os.environ.get("PORT", 8080))  # Default to 8080 if PORT not set
+    app.run(host="0.0.0.0", port=port)
