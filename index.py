@@ -64,3 +64,27 @@ def download_audio():
                 print(f"🗑 Temporary file deleted: {output_file}")
             except Exception as cleanup_error:
                 print(f"⚠️ Cleanup failed: {cleanup_error}")
+            return response
+
+        # Determine MIME type
+        mime_type, _ = mimetypes.guess_type(output_file)
+        if not mime_type:
+            mime_type = "application/octet-stream"
+
+        # Return the file as download
+        return send_file(
+            output_file,
+            as_attachment=True,
+            download_name=f"audio.{format}",
+            mimetype=mime_type
+        )
+    except yt_dlp.utils.DownloadError as e:
+        traceback.print_exc()
+        return jsonify({"error": f"Download error: {str(e)}"}), 500
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({"error": f"Server error: {str(e)}"}), 500
+
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=8080)
