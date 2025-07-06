@@ -1,9 +1,10 @@
-from flask import Flask, request, jsonify, send_file
+from flask import Flask, request, jsonify, send_file, after_this_request
 from flask_cors import CORS
 import yt_dlp
 import tempfile
 import os
 import traceback
+import mimetypes
 
 app = Flask(__name__)
 CORS(app)  # Allow requests from frontend
@@ -44,7 +45,7 @@ def download_audio():
                 'preferredquality': quality,
             }],
             'quiet': True,
-            'cookiefile': 'cookies.txt',  # add your YouTube cookies file
+            'cookiefile': 'cookies.txt',  # optional: for restricted videos
         }
 
         print(f"▶️ Starting download for: {url}")
@@ -55,24 +56,11 @@ def download_audio():
 
         print(f"✅ Download completed: {output_file}")
 
-        # Return the file as download
-        return send_file(
-            output_file,
-            as_attachment=True,
-            download_name=f"audio.{format}",
-            mimetype="audio/mpeg"
-        )
-    except yt_dlp.utils.DownloadError as e:
-        traceback.print_exc()
-        return jsonify({"error": f"Download error: {str(e)}"}), 500
-    except Exception as e:
-        traceback.print_exc()
-        return jsonify({"error": f"Server error: {str(e)}"}), 500
-    finally:
-        # Clean up temporary file
-        if os.path.exists(output_file):
-            os.remove(output_file)
-
-
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8080)
+        # Automatically delete temp file after response is sent
+        @after_this_request
+        def cleanup(response):
+            try:
+                os.remove(output_file)
+                print(f"🗑 Temporary file deleted: {output_file}")
+            except Exception as cleanup_error:
+                print(f"⚠️ Cleanup failed: {cleanup_error}")
