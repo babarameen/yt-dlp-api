@@ -1,6 +1,8 @@
 {
   "info": {
-    "name": "yt-dlp API",
+    "name": "YT-DLP API",
+    "_postman_id": "e8c6b50d-29e3-4c17-b1f2-abc123456789",
+    "description": "Test collection for YT-DLP API",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -10,8 +12,8 @@
         "method": "GET",
         "header": [],
         "url": {
-          "raw": "{{baseUrl}}/health",
-          "host": ["{{baseUrl}}"],
+          "raw": "{{base_url}}/health",
+          "host": ["{{base_url}}"],
           "path": ["health"]
         }
       }
@@ -20,28 +22,20 @@
       "name": "Download Audio",
       "request": {
         "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
         "body": {
           "mode": "raw",
-          "raw": "{\n    \"url\": \"https://www.youtube.com/watch?v=dQw4w9WgXcQ\",\n    \"format\": \"mp3\"\n}"
+          "raw": "{\n    \"url\": \"https://www.youtube.com/watch?v=Zi_XLOBDo_Y\"\n}"
         },
         "url": {
-          "raw": "{{baseUrl}}/download",
-          "host": ["{{baseUrl}}"],
+          "raw": "{{base_url}}/download",
+          "host": ["{{base_url}}"],
           "path": ["download"]
         }
       }
     }
   ],
   "variable": [
-    {
-      "key": "baseUrl",
-      "value": "https://yt-dlp-api-production-4978.up.railway.app"
-    }
+    { "key": "base_url", "value": "http://localhost:8080" }
   ]
 }
