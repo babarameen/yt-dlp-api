@@ -1,7 +1,7 @@
 FROM python:3.10-slim
 
-# Install ffmpeg and certificates
-RUN apt-get update && apt-get install -y ffmpeg ca-certificates && apt-get clean
+# Install ffmpeg
+RUN apt-get update && apt-get install -y ffmpeg
 
 # Set working directory
 WORKDIR /app
@@ -13,8 +13,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy all project files
 COPY . .
 
-# Expose port (for Railway dynamic port)
+# Expose port (Railway uses dynamic PORT)
 EXPOSE 8080
 
-# Start Flask app directly for debugging
+# Run Flask directly for Railway
 CMD ["python", "wsgi.py"]
