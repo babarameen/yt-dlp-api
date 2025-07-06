@@ -1,4 +1,3 @@
-# Use slim Python image
 FROM python:3.10-slim
 
 # Install ffmpeg and certificates
