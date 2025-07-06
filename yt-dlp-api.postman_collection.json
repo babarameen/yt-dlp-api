@@ -1,0 +1,47 @@
+{
+  "info": {
+    "name": "yt-dlp API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/health",
+          "host": ["{{baseUrl}}"],
+          "path": ["health"]
+        }
+      }
+    },
+    {
+      "name": "Download Audio",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"url\": \"https://www.youtube.com/watch?v=dQw4w9WgXcQ\",\n    \"format\": \"mp3\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/download",
+          "host": ["{{baseUrl}}"],
+          "path": ["download"]
+        }
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://yt-dlp-api-production-4978.up.railway.app"
+    }
+  ]
+}
