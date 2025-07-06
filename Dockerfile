@@ -17,4 +17,5 @@ COPY . .
 EXPOSE 8080
 
 # Run with Gunicorn (increased timeout for long downloads)
-CMD ["gunicorn", "--bind", "0.0.0.0:8080", "--timeout", "120", "index:app"]
+CMD exec gunicorn --bind :$PORT --timeout 120 index:app
+
