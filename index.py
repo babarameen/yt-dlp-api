@@ -11,7 +11,7 @@ CORS(app)  # Enable CORS for frontend access
 
 @app.route("/")
 def home():
-    return jsonify({"status": "✅ YT-DLP API is running!"})
+    return "✅ YT-DLP API is running!"
 
 @app.route("/health", methods=["GET"])
 def health():
@@ -22,47 +22,44 @@ def download_audio():
     try:
         data = request.get_json()
         url = data.get("url")
-        audio_format = data.get("format", "mp3")
+        format = data.get("format", "mp3")
         quality = data.get("quality", "192")
 
         if not url:
-            return jsonify({"error": "Missing 'url' parameter"}), 400
+            return jsonify({"error": "Missing URL parameter"}), 400
 
         # Create a temporary file for output
-        temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=f".{audio_format}")
+        temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=f".{format}")
         output_file = temp_file.name
         temp_file.close()
 
         ydl_opts = {
-            "format": "bestaudio/best",
-            "outtmpl": output_file,
-            "postprocessors": [{
-                "key": "FFmpegExtractAudio",
-                "preferredcodec": audio_format,
-                "preferredquality": quality,
+            'format': 'bestaudio/best',
+            'outtmpl': output_file,
+            'postprocessors': [{
+                'key': 'FFmpegExtractAudio',
+                'preferredcodec': format,
+                'preferredquality': quality,
             }],
-            "quiet": True,
+            'quiet': True,
         }
 
-        print(f"▶️ Downloading from URL: {url}")
+        print(f"▶️ Starting download for: {url}")
 
-        # Download audio
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             ydl.download([url])
 
-        print(f"✅ Download complete: {output_file}")
+        print(f"✅ Download completed: {output_file}")
 
-        # Cleanup temp file after response is sent
         @after_this_request
         def cleanup(response):
             try:
                 os.remove(output_file)
-                print(f"🗑 Temp file deleted: {output_file}")
-            except Exception as cleanup_err:
-                print(f"⚠️ Failed to delete temp file: {cleanup_err}")
+                print(f"🗑 Temporary file deleted: {output_file}")
+            except Exception as cleanup_error:
+                print(f"⚠️ Cleanup failed: {cleanup_error}")
             return response
 
-        # Guess MIME type
         mime_type, _ = mimetypes.guess_type(output_file)
         if not mime_type:
             mime_type = "application/octet-stream"
@@ -70,18 +67,16 @@ def download_audio():
         return send_file(
             output_file,
             as_attachment=True,
-            download_name=f"audio.{audio_format}",
-            mimetype=mime_type,
+            download_name=f"audio.{format}",
+            mimetype=mime_type
         )
-
-    except yt_dlp.utils.DownloadError as err:
+    except yt_dlp.utils.DownloadError as e:
         traceback.print_exc()
-        return jsonify({"error": f"YT-DLP Download error: {str(err)}"}), 500
-    except Exception as err:
+        return jsonify({"error": f"Download error: {str(e)}"}), 500
+    except Exception as e:
         traceback.print_exc()
-        return jsonify({"error": f"Server error: {str(err)}"}), 500
+        return jsonify({"error": f"Server error: {str(e)}"}), 500
 
-# Run app (development only – Gunicorn used in production)
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 8080))  # Railway provides $PORT
+    port = int(os.environ.get("PORT", 8080))  # Railway dynamic port
     app.run(host="0.0.0.0", port=port)
