@@ -16,5 +16,5 @@ COPY . .
 # Expose port (for Railway dynamic port)
 EXPOSE 8080
 
-# Start the app with Gunicorn
-CMD ["gunicorn", "wsgi:app", "--bind", "0.0.0.0:$PORT", "--worker-class", "gevent", "--timeout", "120", "--access-logfile", "-"]
+# Start Flask app directly for debugging
+CMD ["python", "wsgi.py"]
